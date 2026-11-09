@@ -1,0 +1,42 @@
+#!/bin/sh
+set -eu
+
+DECKKIT_URL='@URL@'
+DECKKIT_SHA='@SHA@'
+DECKKIT_STAGE=$(mktemp -d "${TMPDIR:-/tmp}/deckkit-install.XXXXXX")
+trap 'rm -rf "$DECKKIT_STAGE"' EXIT HUP INT TERM
+
+deckkit_error() {
+    if command -v zenity >/dev/null 2>&1; then
+        zenity --error --title=deckkit --text="$1" || true
+    elif command -v kdialog >/dev/null 2>&1; then
+        kdialog --error "$1" --title deckkit || true
+    fi
+}
+
+deckkit_download() {
+    printf '# Downloading deckkit\n'
+    curl --fail --location --retry 2 --connect-timeout 15 \
+        --output "$DECKKIT_STAGE/runtime.tar.gz" "$DECKKIT_URL" || return 1
+    printf '%s  %s\n' "$DECKKIT_SHA" "$DECKKIT_STAGE/runtime.tar.gz" \
+        | sha256sum --check --status || return 1
+
+    printf '# Preparing installer\n'
+    tar -xzf "$DECKKIT_STAGE/runtime.tar.gz" -C "$DECKKIT_STAGE" || return 1
+    touch "$DECKKIT_STAGE/complete"
+}
+
+if command -v zenity >/dev/null 2>&1; then
+    (deckkit_download 2>"$DECKKIT_STAGE/error") \
+        | zenity --progress --pulsate --auto-close --no-cancel \
+            --title=deckkit --text="Downloading installer" || true
+else
+    deckkit_download 2>"$DECKKIT_STAGE/error" || true
+fi
+
+if [ ! -f "$DECKKIT_STAGE/complete" ]; then
+    deckkit_error 'The installer could not be downloaded or verified. Check your connection and run it again.'
+    exit 1
+fi
+
+"$DECKKIT_STAGE/deckkit" installer cyberpunk2077

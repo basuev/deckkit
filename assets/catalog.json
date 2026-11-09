@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "deckkit",
+  "repository": "basuev/deckkit",
+  "packages": [
+    {
+      "id": "cyberpunk2077",
+      "name": "Cyberpunk 2077",
+      "version": "0.1.0",
+      "kind": "cyberpunk2077",
+      "category": "games",
+      "summary": "Low graphics, uncapped or 45 FPS at stock 15 W, and a larger interface."
+    }
+  ]
+}
