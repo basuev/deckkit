@@ -59,6 +59,11 @@ Desktop bootstrap embeds the exact runtime URL and hash. Bundles are ordinary
 tar.gz archives with relative internal symlinks preserved. Include the licenses
 of the libraries actually bundled by the Ubuntu 22.04 build.
 
+HTTPS uses the host CA bundle at `/etc/ssl/certs/ca-certificates.crt`, with
+`SSL_CERT_FILE` honored when set. The bundled Ubuntu OpenSSL defaults use paths
+that are absent on SteamOS. Share the explicit verified context between catalog
+requests and archive downloads. Do not disable certificate verification.
+
 Recognized earlier `codex-deck-ui.archive` and `codex-performance.ini` files are
 adopted once and removed, preserving their selected profile. Modified legacy
 files remain user-owned. The same rollback snapshot covers old and new paths.

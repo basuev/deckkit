@@ -1,8 +1,8 @@
 """Read the bundled package list and refresh it on explicit request."""
 
 import json
-import urllib.request
 
+from .archive import open_url
 from .paths import write_json
 
 
@@ -22,7 +22,7 @@ def load(data_root, state, config):
 
 
 def fetch(url, state):
-    with urllib.request.urlopen(url, timeout=15) as response:
+    with open_url(url, timeout=15) as response:
         catalog = json.load(response)
 
     if catalog.get("schema") != 1 or not isinstance(

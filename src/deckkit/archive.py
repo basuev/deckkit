@@ -1,10 +1,21 @@
 """Download verified release archives and extract their files."""
 
 import hashlib
+import os
+import ssl
 import tarfile
 import urllib.parse
 import urllib.request
 from pathlib import Path
+
+
+def open_url(url, timeout):
+    # Ubuntu's bundled OpenSSL defaults point outside SteamOS's trust store.
+    cafile = os.environ.get(
+        "SSL_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"
+    )
+    context = ssl.create_default_context(cafile=cafile)
+    return urllib.request.urlopen(url, timeout=timeout, context=context)
 
 
 def download(url, target, expected):
@@ -16,7 +27,7 @@ def download(url, target, expected):
         raise ValueError("Downloads need HTTPS.")
     digest = hashlib.sha256()
     with (
-        urllib.request.urlopen(url, timeout=30) as inp,
+        open_url(url, timeout=30) as inp,
         Path(target).open("wb") as out,
     ):
         while True:
